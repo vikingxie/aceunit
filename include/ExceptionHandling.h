@@ -64,6 +64,7 @@
 
 #include <setjmp.h>
 #include <string.h>
+#include <stdbool.h>
 
 /** The exception buffer of the current thread.
  * If you work in a multi-threaded environment, make sure the scheduler allocates a jmp_buf for each thread and initializes currentExceptionBuffer for that thread with each conext switch.
@@ -87,25 +88,33 @@ extern jmp_buf *currentExceptionBuffer;
         jmp_buf *prev = currentExceptionBuffer; \
         currentExceptionBuffer = &lbuf; \
         switch (exception = setjmp(lbuf)) { \
-        case 0: do \
+        case 0: \
+            while (true) \
+            { \
+                do \
 
 /** Define an exception handler.
  * @param X exception to catch, MUST be of type int.
  */
 #define catch(X) \
-            while (false); \
-            break; \
-        case (X): exception = 0; do \
+                while (false); \
+                break; \
+                case (X): exception = 0; do \
 
-/** Define a default exception handler. */
-#define catchAll() \
-            while (false); \
-            break; \
-        default: exception = 0; do \
+/** Define a finally block handler. */
+#define finally \
+                while (false); \
+                break; \
+            } \
+        default: \
+            { \
+                do \
 
 /** End exception handling. */
 #define endtry \
-            while (false); \
+                while (false); \
+                break; \
+            } \
         } \
         currentExceptionBuffer = prev; \
         if (exception) { \
